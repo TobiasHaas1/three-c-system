@@ -22,17 +22,22 @@ public class JiraWebhookController {
     @PostMapping("/webhook")
     public ResponseEntity<JsonNode> handleJiraWebhook(@RequestBody String rawPayload) {
         try {
-            // Delegate business logic to the renamed service layer
+            // Delegate the heavy lifting to the TicketService
             JsonNode responseJson = ticketService.processWebhookPayload(rawPayload);
+
+            // If the service decided to skip it (e.g., status wasn't Done)
+            if (responseJson.has("status") && responseJson.get("status").asText().equals("skipped")) {
+                return ResponseEntity.ok(responseJson);
+            }
 
             return ResponseEntity.ok(responseJson);
 
         } catch (Exception e) {
-            System.err.println("❌ ERROR: " + e.getMessage());
+            System.err.println("❌ WEBHOOK ERROR: " + e.getMessage());
+            e.printStackTrace();
 
             ObjectNode errorJson = objectMapper.createObjectNode();
             errorJson.put("error", e.getMessage());
-
             return ResponseEntity.internalServerError().body(errorJson);
         }
     }
