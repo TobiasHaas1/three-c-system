@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="SqlDialectMappings">
-    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V2__split_ticket_key.sql" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V3__update_ticket_statuses.sql" dialect="GenericSQL" />
-    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V4__update_tempo.sql" dialect="GenericSQL" />
-  </component>
-</project>
