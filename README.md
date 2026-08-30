@@ -167,6 +167,36 @@ chatter), `erp_sync` is `"skipped"` and no invoice call is made.
 
 ---
 
+## 🔧 Customization via `bausteine.json`
+
+The entire "personality" and rule set of the AI step lives in **one JSON
+file** (`src/main/resources/bausteine.json`) — not in Java code.
+`TempoTranslationService` doesn't know any IT vocabulary, tone-of-voice
+rules, or output format itself; at startup (`@PostConstruct`) it just reads
+this file and mechanically assembles it into one system prompt, in this
+fixed order:
+
+| Key | Purpose |
+|---|---|
+| `identitaet` + `aufgabe` | Who the AI "is" and what its job is |
+| `filter_logik` | What gets deleted entirely before anything is rewritten (e.g. purely internal chatter) |
+| `bausteine` | The core: a closed list of `trigger` → `replacement` phrase pairs, e.g. *AnyDesk/VPN/remote* → "Verbindung per Fernwartung hergestellt". This is fixed vocabulary, not free paraphrasing — every technician's notes come out sounding consistent. |
+| `strikte_verbote` | Hard bans (no adjectives, no titles, no product names, no internal IDs/first names) |
+| `bedingter_abschluss` | Conditional rules, e.g. auto-appending "Funktionstest ausgeführt, Funktion OK" whenever a test is confirmed |
+| `output_format` | Forces the model to reply with exactly `{"customer_billing_text": "..."}`, including a worked example (few-shot) |
+
+Because all of this is data, not code, **anyone can reshape the AI's entire
+behavior by editing the JSON — no Java changes needed**:
+
+- New client, different standard phrasing? Add a `bausteine` entry, e.g.
+  `{"trigger": "Backup / Sicherung", "replacement": "Datensicherung durchgeführt"}`.
+- Different tone or language? Edit `identitaet` / `aufgabe`.
+- An extra hard rule (e.g. never spell out customer names)? Add one line to
+  `strikte_verbote`.
+- A different output shape (e.g. an extra category field)? Adjust
+  `output_format` — the Java side only ever parses `customer_billing_text`
+  generically, so it doesn't need to change.
+
 ## ⚙️ Configuration
 
 Nothing in this repo is a real credential — every value has a
